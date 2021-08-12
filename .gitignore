@@ -1,0 +1,10 @@
+logs
+*.log
+npm-debug.log*
+.DS_Store
+cache
+coverage
+node_modules
+build
+public/static
+.env.*.local
