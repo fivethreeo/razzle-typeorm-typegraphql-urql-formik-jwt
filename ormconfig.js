@@ -1,8 +1,14 @@
+const db_url = process.env.DATABASE_URL || 'sqlite://./db.sqlite3'
+const db_type = db_url.split('://')[0];
 
-module.exports = {
-    // "url": process.env.DATABASE_URL,
-    "database": './db.sqlite3',
-    "type": process.env.DATABASE_TYPE || 'sqlite',
+const db_options = db_type === 'sqlite' ? {
+    "database": db_url.split('://')[1]
+} : {
+    "url": db_url
+}
+
+module.exports = Object.assign({
+    "type": db_type,
     "synchronize": true,
     "logging": false,
     "entities": [
@@ -19,4 +25,4 @@ module.exports = {
         "migrationsDir": "src/migrations",
         "subscribersDir": "src/subscribers"
     }
-};
+}, db_options);

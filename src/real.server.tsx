@@ -8,6 +8,7 @@ import React from "react";
 import express from "express";
 import { renderToString } from "react-dom/server";
 import { StaticRouter } from "react-router-dom";
+import { User } from "./entities/User";
 import { UserResolver } from "./schema/userResolver";
 import App from "./App";
 
@@ -81,8 +82,21 @@ export const renderApp = async (req, res) => {
   return { html, context };
 };
 
+const db_url = process.env.DATABASE_URL || 'sqlite://./db.sqlite3'
+const db_type = db_url.split('://')[0];
+
+const db_options = db_type === 'sqlite' ? {
+    "database": db_url.split('://')[1]
+} : {
+    "url": db_url
+}
+
 const createserver = async () => {
-  const connection = await createConnection();
+  const connection = await createConnection({
+    entities: [User],
+    type: db_type,
+    ...db_options
+  });
 
   const schema = await buildSchema({
     resolvers: [UserResolver]
@@ -92,7 +106,7 @@ const createserver = async () => {
   let server = express();
 
   await apolloServer.start()
-  
+
   apolloServer.applyMiddleware({ app: server });
 
   server = server

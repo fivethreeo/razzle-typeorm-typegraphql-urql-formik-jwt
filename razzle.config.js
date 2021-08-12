@@ -40,7 +40,7 @@ module.exports = {
       );
     }
     if (target === 'node') {
-      webpackOptions.startServerOptions.nodeArgs.unshift('-r', 'ts-node/register')
+      // webpackOptions.startServerOptions.nodeArgs.unshift('-r', 'ts-node/register')
     }
     /*
     webpackOptions.notNodeExternalResMatch = (request, context) => {
