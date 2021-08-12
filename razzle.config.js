@@ -39,6 +39,9 @@ module.exports = {
         publichost
       );
     }
+    if (target === 'node') {
+      webpackOptions.startServerOptions.nodeArgs.unshift('-r', 'ts-node/register')
+    }
     /*
     webpackOptions.notNodeExternalResMatch = (request, context) => {
       return /stitches/.test(request);

@@ -8,6 +8,7 @@ import React from "react";
 import express from "express";
 import { renderToString } from "react-dom/server";
 import { StaticRouter } from "react-router-dom";
+import { UserResolver } from "./schema/userResolver";
 import App from "./App";
 
 const assets = require(process.env.RAZZLE_ASSETS_MANIFEST);
@@ -84,12 +85,14 @@ const createserver = async () => {
   const connection = await createConnection();
 
   const schema = await buildSchema({
-    resolvers: [Resolvers],
+    resolvers: [UserResolver]
   });
 
   const apolloServer = new ApolloServer({ schema });
   let server = express();
 
+  await apolloServer.start()
+  
   apolloServer.applyMiddleware({ app: server });
 
   server = server
