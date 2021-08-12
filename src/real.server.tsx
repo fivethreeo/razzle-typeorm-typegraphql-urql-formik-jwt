@@ -1,8 +1,14 @@
-import App from "./App";
+
+import 'reflect-metadata';
+import { ApolloServer } from 'apollo-server-express';
+import express from 'express';
+import { createConnection } from 'typeorm';
+import { buildSchema } from 'type-graphql';
 import React from "react";
 import express from "express";
 import { renderToString } from "react-dom/server";
 import { StaticRouter } from "react-router-dom";
+import App from "./App";
 
 const assets = require(process.env.RAZZLE_ASSETS_MANIFEST);
 
@@ -38,7 +44,10 @@ const jsScriptTagsFromAssets = (
 const server = express();
 
 export const renderApp = async (req, res) => {
-  const public_path = typeof CODESANDBOX_HOST !== 'undefined' ? `https://${CODESANDBOX_HOST}/` : 'http://localhost:3001/';
+  const public_path =
+    typeof CODESANDBOX_HOST !== "undefined"
+      ? `https://${CODESANDBOX_HOST}/`
+      : "http://localhost:3001/";
 
   const context = {};
   const markup = renderToString(
@@ -71,18 +80,33 @@ export const renderApp = async (req, res) => {
   return { html, context };
 };
 
-server
-  .disable("x-powered-by")
-  .use(express.static(process.env.RAZZLE_PUBLIC_DIR))
-  .get("/*", async (req, res) => {
-    const { html, context } = await renderApp(req, res);
+const createserver = async () => {
+  const connection = await createConnection();
 
-    if (context.url) {
-      // Somewhere a `<Redirect>` was rendered
-      return res.redirect(301, context.url);
-    }
-
-    res.send(html);
+  const schema = await buildSchema({
+    resolvers: [Resolvers],
   });
 
-export default server;
+  const apolloServer = new ApolloServer({ schema });
+  let server = express();
+
+  apolloServer.applyMiddleware({ app: server });
+
+  server = server
+    .disable("x-powered-by")
+    .use(express.static(process.env.RAZZLE_PUBLIC_DIR))
+    .get("/*", async (req, res) => {
+      const { html, context } = await renderApp(req, res);
+
+      if (context.url) {
+        // Somewhere a `<Redirect>` was rendered
+        return res.redirect(301, context.url);
+      }
+
+      res.send(html);
+    });
+
+  return server;
+};
+
+export default createserver();

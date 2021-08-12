@@ -16,12 +16,11 @@ if (module.hot) {
 
 const port = process.env.PORT || 3000;
 
-export default express()
-  .use((req, res) => app.handle(req, res))
-  .listen(port, function(err) {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    console.log(`> Started on port ${port}`);
+export default app.then(theapp=>{
+  express()
+  .use((req, res) => theapp.handle(req, res))
+  .listen(port, () => {
+    console.log(`> App started http://localhost:${port}`)
+    console.log(`> Graphql at http://localhost:${port}/graphql`)
   });
+});
