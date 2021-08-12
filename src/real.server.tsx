@@ -102,7 +102,11 @@ const createserver = async () => {
     resolvers: [UserResolver]
   });
 
-  const apolloServer = new ApolloServer({ schema });
+  const apolloServer = new ApolloServer({
+    schema,
+    context: ({ req, res }) => ({ req, res })
+  });
+
   let server = express();
 
   await apolloServer.start()
