@@ -1,25 +1,30 @@
 
 import 'reflect-metadata';
-import { ApolloServer } from 'apollo-server-express';
-import express from 'express';
-import { createConnection } from 'typeorm';
-import { buildSchema } from 'type-graphql';
+import express, { Request, Response } from 'express';
 import React from "react";
-import express from "express";
+import { ApolloServer } from 'apollo-server-express';
+import { buildSchema } from 'type-graphql';
+import { createConnection } from 'typeorm';
 import { renderToString } from "react-dom/server";
 import { StaticRouter } from "react-router-dom";
 import { User } from "./entities/User";
 import { UserResolver } from "./schema/userResolver";
+
 import App from "./App";
+
+type STATIC_CONTEXT = {
+  statusCode?: number,
+  url?: string
+}
 
 const assets = require(process.env.RAZZLE_ASSETS_MANIFEST);
 
-const cssLinksFromAssets = (public_path, assets, entrypoint) => {
+const cssLinksFromAssets = (public_path: string, assets: unknown, entrypoint: string): string => {
   return assets[entrypoint]
     ? assets[entrypoint].css
       ? assets[entrypoint].css
           .map(
-            (asset) => `<link rel="stylesheet" href="${public_path}${asset}">`
+            (asset: string) => `<link rel="stylesheet" href="${public_path}${asset}">`
           )
           .join("")
       : ""
@@ -27,16 +32,16 @@ const cssLinksFromAssets = (public_path, assets, entrypoint) => {
 };
 
 const jsScriptTagsFromAssets = (
-  public_path,
-  assets,
-  entrypoint,
-  extra = ""
-) => {
+  public_path: string,
+  assets: unknown,
+  entrypoint: string,
+  extra: string = ""
+): string => {
   return assets[entrypoint]
     ? assets[entrypoint].js
       ? assets[entrypoint].js
           .map(
-            (asset) => `<script src="${public_path}${asset}"${extra}></script>`
+            (asset: string) => `<script src="${public_path}${asset}"${extra}></script>`
           )
           .join("")
       : ""
@@ -45,13 +50,13 @@ const jsScriptTagsFromAssets = (
 
 const server = express();
 
-export const renderApp = async (req, res) => {
+export const renderApp = async (req: Request, res: Response) => {
   const public_path =
     typeof CODESANDBOX_HOST !== "undefined"
       ? `https://${CODESANDBOX_HOST}/`
       : "http://localhost:3001/";
 
-  const context = {};
+  const context: STATIC_CONTEXT = {};
   const markup = renderToString(
     <StaticRouter location={req.url} context={context}>
       <App />
@@ -92,7 +97,8 @@ const db_options = db_type === 'sqlite' ? {
 }
 
 const createserver = async () => {
-  const connection = await createConnection({
+  // @ts-ignore
+  await createConnection({
     entities: [User],
     type: db_type,
     ...db_options
