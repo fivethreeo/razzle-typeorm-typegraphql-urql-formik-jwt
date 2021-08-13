@@ -1,7 +1,7 @@
 "use strict";
 
 const hostparts = (process.env.HOSTNAME||'').match(/(\w+)-\w+-(\w+)/);
-const publichost = /codesandbox/.test((process.env.HOSTNAME||''))
+const publichost = process.env.CODESANDBOX_SSE
   && `${hostparts[2]}.${hostparts[1]}.codesandbox.io`;
 
 module.exports = {
